@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>POSIT'IF</title>
+        <link rel="stylesheet" href="style.css" type="text/css"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="//code.jquery.com/jquery-1.12.1.min.js"></script>
+    </head>
+    <body>
+        <div class="row">
+            <div class="columnLeft">
+                <h1>POSIT'IF</h1>
+            </div>
+            <div class="columnRight">
+                <br/>
+                <div align="right">
+                    <a href="Connexion_Inscription.html" class="upperButton">Connexion</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="columnLeft">
+                <h3 style="text-align:center">Nos Mediums</h3>
+            </div>
+            <div class="columnRight"></div>
+        </div>
+        <div class="row">
+            <div class="columnLeft">
+                <h4>Voyants</h4>
+                <a id="listeVoyants">
+                    <span>chargement en cours...</span>
+                </a>
+                <h4>Tarologues</h4>
+                <a id="listeTarologues">
+                    <span>chargement en cours...</span>
+                </a><h4>Astrologues</h4>
+                <a id="listeAstrologues">
+                    <span>chargement en cours...</span>
+                </a>
+            </div>
+            <div class="columnRight" style="background-color: #e6e6e6;">
+                <div id="bioMedium"></div>
+            </div>
+        </div>
+        <br/>
+        <div align="right">    
+            <input type="button" onclick="location.href='Connexion_Inscription.html';" value="Demander une voyance"/>
+        </div>
+        <script>
+            $(document).ready(function() {
+                
+                //checks if there's any user's session active and redirects
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'accessClient'
+                    },
+                    dataType: 'json'
+                }).done(function(data){
+                    var access = data.rights.access;
+                    if (access){
+                        window.location="Voyance.html";
+                    }
+                });
+                
+                // listeVoyants
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'listeVoyants'
+                    },
+                    dataType: 'json'
+                })
+                .done(function(data){
+                    var voyants = data.voyants;
+                    var contenuHtml = '<ul>';
+                    var i;
+                    for (i=0; i<voyants.length; i++){
+                        contenuHtml += '<li class="medium" name="'+voyants[i].nom+'">' + voyants[i].nom + '</li>';
+                    }
+                    contenuHtml += '</ul>';
+                    $('#listeVoyants').html(contenuHtml);
+                })
+                .fail(function(){
+                    $('#listeVoyants').html('Erreur de chargement');
+                });
+                
+                // listeTarologues
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'listeTarologues'
+                    },
+                    dataType: 'json'
+                })
+                .done(function(data){
+                    var tarologues = data.tarologues;
+                    var contenuHtml = '<ul>';
+                    var i=0;
+                    for (i=0; i<tarologues.length; i++){
+                        contenuHtml += '<li class="medium" name="'+tarologues[i].nom+'">' + tarologues[i].nom + '</li>';
+                    }
+                    contenuHtml += '</ul>';
+                    $('#listeTarologues').html(contenuHtml);
+                })
+                .fail(function(){
+                    $('#listeTarologues').html('Erreur de chargement');
+                });
+                
+                // listeAstrologues
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'listeAstrologues'
+                        //param: '[...]'
+                    },
+                    dataType: 'json'
+                })
+                .done(function(data){
+                    var astrologues = data.astrologues;
+                    var contenuHtml = '<ul>';
+                    var i=0;
+                    for (i=0; i<astrologues.length; i++){
+                        contenuHtml += '<li class="medium" name="'+astrologues[i].nom+'">' + astrologues[i].nom + '</li>';
+                    }
+                    contenuHtml += '</ul>';
+                    $('#listeAstrologues').html(contenuHtml);
+                })
+                .fail(function(){
+                    $('#listeAstrologues').html('Erreur de chargement');
+                });
+                
+                // Biography of clicked medium
+                $('a').on("click",".medium",function(){
+                    var nom = $(this).attr("name");
+                    $.ajax({
+                        url:'./ActionServlet',
+                        type: 'POST',
+                        data: {
+                            action: 'bioMedium',
+                            name: nom
+                        },
+                        dataType: 'json'
+                    })
+                    .done(function(data){
+                        var bio = data.bio.bio; //object bio in container bio
+                        var contenuHtml = '<h4>&nbsp;'+nom+'</h4>';
+                        contenuHtml += '<p>&nbsp;'+bio+'</p>';
+                        $('#bioMedium').html(contenuHtml);
+                    })
+                    .fail(function(){
+                        $('#bioMedium').html('Erreur de chargement');     
+                    });
+                });
+            });
+            
+        </script>
+    </body>
+</html>

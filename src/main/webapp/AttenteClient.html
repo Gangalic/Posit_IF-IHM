@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Attente Client</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script src="//code.jquery.com/jquery-1.12.1.min.js"></script>
+    </head>
+    <body>
+        <div class="row">
+            <div style="flex:64%" align ="left">
+                <h1>POSIT'IF</h1>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a href="Consultation.html" class="upperButton" >Voyance</a>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a href="Statistique.html" class="upperButton" >Statistique</a>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a id ="Deconnexion" href="#" class="upperButton" >Déconnexion</a>
+            </div>
+        </div>
+        
+        <div  class="centerAttenteClient"  style="text-align:center;">
+            <h2>En attente de Client...</h2>
+        </div>
+        
+        <div class="footer">
+            <p>POSIT'IF - 2018 &nbsp; &nbsp; &nbsp;</p>
+        </div>
+        
+        <script>
+            $(document).ready(function(){
+                
+                //checks if there's any employer session active
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'accessEmploye'
+                    },
+                    dataType: 'json'
+                }).done(function(data){
+                    var access = data.rights.access;
+                    if (!access){
+                        window.location="index.html";
+                    }
+                });
+                
+                // deconnection of employer
+                $('#Deconnexion').on("click",function(){
+                    $.ajax({
+                        url:'./ActionServlet',
+                        type: 'POST',
+                        data: {
+                            action: 'deconnectionEmploye'
+                        },
+                        dataType: 'json'
+                    })
+                    .done(function(){
+                        window.location ="index.html";
+                    })
+                    .fail(function(){
+                        alert("Impossible de se deconnecter");
+                    });
+                });
+                
+            });
+        </script>
+    </body>
+</html>

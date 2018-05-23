@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Connexion Employe</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script src="//code.jquery.com/jquery-1.12.1.min.js"></script>
+    </head>
+    <body>
+        <h1>POSIT'IF</h1>
+        <div  class="centerConnection"  style="text-align:center;">
+            <h2>Connexion</h2>
+            <br/>
+            <label style="text-align:center;">Identifiant :</label>
+            <input class="formulaire" id="IdEmploye" type="text" value="" required/>
+            <br/>
+            <br/>
+            <div style="text-align: right;">
+                <input id="boutonConnexion" class="button" type="submit" value="Se Connecter" />
+            </div>
+            <br/>
+            <br/>
+            <div id="messageConnexion" style="font-style:italic;"></div>
+        </div>
+        
+        <div class="footer">
+            <p>POSIT'IF - 2018 &nbsp; &nbsp; &nbsp;</p>
+        </div>
+        
+        <script>
+            $(document).ready(function () {
+                
+                //checks if there's any employer session active and redirects
+                //to (Demande de) Consultation
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'accessEmploye'
+                    },
+                    dataType: 'json'
+                }).done(function(data){
+                    var access = data.rights.access;
+                    if (access){
+                        window.location="Consultation.html";
+                    }
+                });
+                
+                // connection of the employer by Id
+                $('#boutonConnexion').on('click', function () {
+                    var id = $('#IdEmploye').val();
+                    $('#messageConnexion').html('Connexion en cours...');
+
+                    $.ajax({
+                        url: './ActionServlet',
+                        method: 'POST',
+                        data: {
+                            action: 'connectionEmploye',
+                            id: id
+                        },
+                        dataType: 'json'
+                    }).done(function (data) {
+                        var validId = data;
+                        if (validId){
+                            window.location = "Consultation.html";
+                        }else{
+                            alert("L'identifiant est invalide");
+                            $('#idEmploye').val("");
+                            $('#messageConnexion').html("");
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

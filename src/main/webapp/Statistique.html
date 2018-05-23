@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Statistique</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="style.css">
+        <script src="//code.jquery.com/jquery-1.12.1.min.js"></script>
+        <script src="https://code.highcharts.com/highcharts.js"></script>
+    </head>
+    <body>
+        <div class="row">
+            <div style="flex:64%" align ="left">
+                <h1>POSIT'IF</h1>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a href="Consultation.html" class="upperButton" >Voyance</a>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a class="upperButton" >Statistique</a>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a id ="Deconnexion" href="#" class="upperButton" >Déconnexion</a>
+            </div>
+        </div>
+        
+        <div class="row">
+            <br/>
+            <div style="flex:5%"></div>
+            <div style="flex:40%" align ="center">
+                <div id="containerMedium" class="highcharts-container"></div>
+            </div>
+            <div style="flex:10%"></div>
+            <div style="flex:40%" align ="left">
+                <div id="containerEmploye" class="highcharts-container"></div>
+            </div>
+            <div style="flex:5%"></div>
+        </div>
+        
+        <br/>
+        <div class="row">
+            <br/>
+            <div style="flex:30%"></div>
+            <div style="flex:40%" align ="center">
+                <div id="containerRepart" class="highcharts-container"></div>
+            </div>
+            <div style="flex:30%"></div>
+        </div>
+        
+        <div class="footer">
+            <p>POSIT'IF - 2018 &nbsp; &nbsp; &nbsp;</p>
+        </div>
+        
+        <script>
+            $(document).ready(function(){
+                
+                
+                //checks if there's any employer session active
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'accessEmploye'
+                    },
+                    dataType: 'json'
+                }).done(function(data){
+                    var access = data.rights.access;
+                    if (!access){
+                        window.location="index.html";
+                    }
+                });
+                
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'recouperationStatistique'
+                    },
+                    dataType: 'json'
+                }).done(function(data){
+                    var label = new Array();
+                    var dataA = new Array();
+                    var title = "Nombre de voyances par medium";
+                    var i;
+                    for (i=0; i<data.statMed.length; i++){
+                        label.push(data.statMed[i].medium);
+                        dataA.push(data.statMed[i].nb);
+                    }
+                    var lineChartMedium = {
+                        labels: label, // the mediums
+                        data: dataA, // their nb of voyances
+                        title: title 
+                    };
+                    buildBarChart('containerMedium', lineChartMedium);
+                    
+                    
+                    for (i=data.statMed.length; i>0; i--){
+                        label.pop();
+                        dataA.pop();
+                    }
+                    title = "Nombre de voyances par employe";
+                    for (i=0; i<data.statEmp.length; i++){
+                        label.push(data.statEmp[i].employe);
+                        dataA.push(data.statEmp[i].nb);
+                    }
+                    var lineChartEmploye = {
+                        labels: label, // the employers
+                        data: dataA, // their nb of voyances
+                        title: title
+                    };
+                    buildBarChart('containerEmploye', lineChartEmploye);
+                    
+                    
+                    title = "Repartition entre employes";
+                    var proportionChartEmploye = {
+                        label: 'Pourcentage des voyances par employe',
+                        data: data.statRep,
+                        title: title
+                    };
+                    buildPieChart('containerRepart', proportionChartEmploye);
+                    
+                    function buildPieChart(container, graphData) {
+
+                        Highcharts.chart(container, {
+
+                            chart: {
+                                type: 'pie'
+                            },
+                            title: {
+                                text: graphData.title
+                            },
+                            subtitle: {
+                                text: 'Source: POSIT_IF'
+                            },
+                            credits: {
+                                enabled: false
+                            },
+                            series: [{name: graphData.label, data: graphData.data}]
+                        });
+                    }
+                    
+                    function buildBarChart(container, graphData) {
+
+                        Highcharts.chart(container, {
+
+                            chart: {
+                                type: 'column'
+                            },
+                            title: {
+                                text: graphData.title
+                            },
+                            subtitle: {
+                                text: 'Source: POSIT_IF'
+                            },
+                            xAxis: {
+                                categories: graphData.labels
+                            },
+                            yAxis: {
+                                title: {
+                                    text: 'Voyances'
+                                }
+                            },
+                            legend: {
+                                enabled: false
+                            },
+                            credits: {
+                                enabled: false
+                            },
+                            series: [{name: 'Données', data: graphData.data}]
+                        });
+                    }
+                });
+                                               
+                // deconnection of employer
+                $('#Deconnexion').on("click",function(){
+                    $.ajax({
+                        url:'./ActionServlet',
+                        type: 'POST',
+                        data: {
+                            action: 'deconnectionEmploye'
+                        },
+                        dataType: 'json'
+                    })
+                    .done(function(){
+                        window.location ="index.html";
+                    })
+                    .fail(function(){
+                        alert("Impossible de se deconnecter");
+                    });
+                });
+               
+                
+            });
+            
+        </script>
+    </body>
+</html>

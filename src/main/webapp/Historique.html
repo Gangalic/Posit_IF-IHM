@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>Historique</title>
+        <link rel="stylesheet" href="style.css" type="text/css"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <script src="//code.jquery.com/jquery-1.12.1.min.js"></script>
+    </head>
+    <body>
+        <div class="row">
+            <div style="flex:52%" align ="left">
+                <h1>POSIT'IF</h1>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a href="Profil.html" class="upperButton" >Profil</a>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a href="Voyance.html" class="upperButton" >Voyance</a>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a class="upperButton" >Historique</a>
+            </div>
+            <div style="flex:12%" align ="left">
+                <br/>
+                <a id ="Deconnexion" href="#" class="upperButton" >Déconnexion</a>
+            </div>
+        </div>
+        <div align="center">    
+            <h2> Historique de vos consultations</h2>
+        </div>
+<table align="center" class="tab" id="tabHistorique">
+      <colgroup>
+        <col span="4" style="border: 2px solid black">
+      </colgroup>
+      <thead align="left">
+        <tr>
+            <th>&nbsp;Medium &nbsp; &nbsp;</th>
+            <th>&nbsp;Date &nbsp; &nbsp;</th>
+            <th>&nbsp;Heure Début &nbsp; &nbsp;</th>
+            <th>&nbsp;Heure Fin &nbsp; &nbsp;</th>
+        </tr>
+      </thead>
+      <tbody id="tab">
+          
+      </tbody>
+    </table>
+           
+            
+        <script>
+            $(document).ready(function() {
+                
+                //checks if there's any user session active
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'accessClient'
+                    },
+                    dataType: 'json'
+                }).done(function(data){
+                    var access = data.rights.access;
+                    if (!access){
+                        window.location="index.html";
+                    }
+                });
+               
+                 //Historique
+                $.ajax({
+                    url:'./ActionServlet',
+                    type: 'POST',
+                    data: {
+                        action: 'historique'
+                    },
+                    dataType: 'json'
+                })      
+                .done(function(data){
+                    var historique = data.historique;
+                    var contenuHtml = '';
+                    var i;
+                    for (i=0; i<historique.length; i++){
+                        contenuHtml += '<tr> <td>'+historique[i].medium+'&nbsp &nbsp &nbsp </td>';
+                        contenuHtml += '<td>'+historique[i].date+'&nbsp &nbsp &nbsp </td>';
+                        contenuHtml += '<td>'+historique[i].heureDebut+'&nbsp &nbsp &nbsp </td>';
+                        contenuHtml += '<td>'+historique[i].heureFin+'&nbsp &nbsp &nbsp </td><tr>';
+                    }
+                    $('#tab').html(contenuHtml);
+                })
+                .fail(function(){
+                    $('#tab').html('Erreur de chargement');
+                });
+                $('#Deconnexion').on("click",function(){
+                    $.ajax({
+                        url:'./ActionServlet',
+                        type: 'POST',
+                        data: {
+                            action: 'deconnection'
+                        },
+                        dataType: 'json'
+                    })
+                    .done(function(){
+                        window.location ="index.html";
+                    })
+                    .fail(function(){
+                        alert("Impossible de se deconnecter");
+                    });
+                });
+            });
+            
+            
+            
+        </script>
+    </body>
+</html>
